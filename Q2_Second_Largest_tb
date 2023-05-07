@@ -1,0 +1,115 @@
+module second_largest_tb();
+  
+  parameter DATA_WIDTH = 'h 20;
+  
+  reg [DATA_WIDTH-1:0] DIN;
+  
+  wire [DATA_WIDTH-1:0] DOUT;
+  
+  bit CLK, RESETN;
+  
+  second_largest DUT (.din(DIN), .clk(CLK), .resetn(RESETN), .dout(DOUT));
+  
+  //forever has to be given inside of INITIAL block inorder to work
+  //since forever has only one line in it thus no BEGIN-END is needed.
+  initial begin
+    forever
+    #5 CLK = ~CLK;
+  end
+  
+  task reset_1();
+ 	RESETN = 0;
+    
+    repeat(5) begin
+      @(posedge CLK);
+      RESETN = 1;
+    end
+    
+    @(posedge CLK);
+    RESETN = 0;
+    
+    repeat (2) begin
+      @(posedge CLK);
+      RESETN = 1;
+    end
+    
+    // Not required to pass this reset if there is reset_2() in use, because RESETN=0 is initially done in reset_2 task.
+    //@(posedge CLK); 
+    //RESETN = 0;
+    
+  endtask
+  
+  task reset_2();
+    @(posedge CLK);
+    RESETN = 0;
+    
+    repeat(5) begin
+      @(posedge CLK);
+      RESETN = 1;
+    end
+    
+    @(posedge CLK);
+    RESETN = 0;
+  endtask 
+  
+  task input_sequence_1();
+    DIN = 'h 2;
+    @(posedge CLK);
+    DIN = 'h 2;
+    @(posedge CLK);
+    DIN = 'h 6;
+    @(posedge CLK);
+    DIN = 'h 0;
+    @(posedge CLK);
+    DIN = 'h e;
+    @(posedge CLK);
+    DIN = 'h c;
+    @(posedge CLK);
+    DIN = 'h 0;
+    @(posedge CLK);
+    DIN = 'h 1;
+    @(posedge CLK);
+    DIN = 'h 2;
+  endtask
+  
+  task input_sequence_2();
+    @(posedge CLK); 
+    // this is given because i/p seq_1's last DIN=2 was getting overwritten by DIN =0 of i/p seq_2. 
+    DIN = 'h 0;
+    @(posedge CLK);
+    DIN = 'h 1;
+    @(posedge CLK);
+    DIN = 'h 2;
+    @(posedge CLK);
+    DIN = 'h 3;
+    @(posedge CLK);
+    DIN = 'h 3;
+    @(posedge CLK);
+    DIN = 'h 3;
+  endtask
+  
+  initial begin
+    
+    fork 
+      reset_1();
+      input_sequence_1();
+    join
+    fork 
+      reset_2();
+      input_sequence_2();
+    join 
+    
+  end
+  
+  initial begin
+  /*  forever begin
+      #5 CLK = ~CLK; 
+    end */
+    $dumpfile("dump.vcd");
+  	$dumpvars;
+  	#170; 
+    // we have total 15 combined input test sequence. each taking 1 clk cycle. therefore 15x10 = 150 clk cycles de;ay. +20 delay more for miscellaneous buffer
+  	$finish;
+  end
+  
+endmodule

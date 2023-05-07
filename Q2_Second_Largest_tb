@@ -110,6 +110,5 @@ module second_largest_tb();
   	#170; 
     // we have total 15 combined input test sequence. each taking 1 clk cycle. therefore 15x10 = 150 clk cycles de;ay. +20 delay more for miscellaneous buffer
   	$finish;
-  end
-  
+  end  
 endmodule

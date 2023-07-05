@@ -1,0 +1,37 @@
+module stopwatch_timer #(parameter DATA_WIDTH=16, MAX=99)
+  (input clk,
+   input reset, start, stop,
+   output logic [DATA_WIDTH-1:0] count);
+
+  int multi_start;
+  
+  always@(posedge clk) begin
+    if(reset) begin
+      count<=0;
+      multi_start<=0;
+    end
+    
+    else if(stop) begin
+      count<=count;
+      multi_start<=0;
+    end
+    
+    else if(start && !stop) begin
+      multi_start<=multi_start+1;
+      count<=count+1;
+      if(count>=MAX) begin //>= is used because when count=MAX after increment, it will be set 0. but 0 will come in wave in the next clock cycle.
+        count<=0;
+      end
+    end
+    
+    else if (!start && !stop) begin
+      if(multi_start>=1) begin
+        count<=count+1;
+        if(count>=MAX) begin
+          count<=0;
+        end
+      end
+    end
+
+  end
+endmodule

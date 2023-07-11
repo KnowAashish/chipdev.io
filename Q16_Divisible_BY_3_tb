@@ -1,0 +1,54 @@
+module divisible_by_3_tb();
+
+  //input=reg output=wire
+  bit CLK;
+  reg DIN, RESETN;
+  wire DOUT;
+  
+  //Generate Clock
+  always
+    #5 CLK=!CLK;
+  
+  //Instantiate DUT
+  divisible_by_3 DUT (.clk(CLK), .resetn(RESETN), .din(DIN), .dout(DOUT));
+  
+  task reset(int num_of_cycles=1);
+    RESETN=1;
+    @(posedge CLK);
+    repeat(num_of_cycles) begin
+      RESETN=0;
+      @(posedge CLK);
+    end
+    RESETN=1;
+  endtask
+  
+  task stimulus(bit value=$random);
+    @(posedge CLK);
+    DIN=value;
+  endtask
+  
+  initial begin
+    $monitor("at time t=%t RESETN=%0b DIN=%0b DOUT=%0b", $time, RESETN, DIN, DOUT);
+    
+    //Test1: Basic 1001 (decimal 9) to check the functionality
+    reset();
+    stimulus(1);
+    stimulus(0);
+    stimulus(0);
+    stimulus(1); // Approx 2+4=6 cyles
+    
+    //Test2: Random Sequence Of 10 Inputs
+    reset();
+    repeat(10) begin
+      stimulus();
+    end // Approx 2+10=12 cycles
+  
+  end
+  
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars;
+    #((6+12 +5)*10) $finish;
+  end
+  
+endmodule

@@ -13,8 +13,6 @@ module divisible_by_3_tb();
   divisible_by_3 DUT (.clk(CLK), .resetn(RESETN), .din(DIN), .dout(DOUT));
   
   task reset(int num_of_cycles=1);
-    RESETN=1;
-    @(posedge CLK);
     repeat(num_of_cycles) begin
       RESETN=0;
       @(posedge CLK);
@@ -23,8 +21,8 @@ module divisible_by_3_tb();
   endtask
   
   task stimulus(bit value=$random);
-    @(posedge CLK);
     DIN=value;
+    @(posedge CLK);
   endtask
   
   initial begin
@@ -35,20 +33,33 @@ module divisible_by_3_tb();
     stimulus(1);
     stimulus(0);
     stimulus(0);
-    stimulus(1); // Approx 2+4=6 cyles
+    stimulus(1); // Approx 1+4=5 cyles
     
     //Test2: Random Sequence Of 10 Inputs
     reset();
     repeat(10) begin
       stimulus();
-    end // Approx 2+10=12 cycles
-  
+    end // Approx 1+10=11 cycles
+    
+    //Test3: Reset is asserted when 11 sequence is given
+    reset();
+    stimulus(1);
+    stimulus(1); // For this 11, DOUT will be high, but not for below 11 sequence
+    
+    reset();
+    stimulus(1);
+    stimulus(1);
+    stimulus(0);
+    fork
+      reset();
+      stimulus(0);
+    join // Approx 1+2+1+3+1= 8cycles
   end
   
   initial begin
     $dumpfile("dump.vcd");
     $dumpvars;
-    #((6+12 +5)*10) $finish;
+    #((5+11+8 +5)*10) $finish;
   end
   
 endmodule

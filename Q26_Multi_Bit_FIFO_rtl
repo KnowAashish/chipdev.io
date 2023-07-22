@@ -1,0 +1,70 @@
+module multi_bit_fifo #(parameter DATA_WIDTH=8)
+  (input clk,
+   input resetn,
+   input [DATA_WIDTH-1:0] din,
+   input wr,
+   output logic [DATA_WIDTH-1:0] dout,
+   output logic empty,
+   output logic full);
+  
+  logic [DATA_WIDTH-1:0]FIFO[1:0];
+  logic [DATA_WIDTH-1:0] out;
+  int count;
+  
+  always@(posedge clk) begin
+    if(!resetn) begin
+      FIFO<={0,0};
+      out<=0;
+      count<=0;
+    end
+    
+    else if( wr) begin
+      count=count+1;
+      FIFO[1]=FIFO[0];
+      FIFO[0]=din;
+      
+      if(count==1) begin
+        out<=FIFO[0];
+      end
+      
+      else if(count>=2) begin
+        count<=2;
+        out<=FIFO[1];
+      end
+    end
+  end
+  assign dout =out;
+  assign empty=(count==0) ? 1:0;
+  assign full =(count==2) ? 1:0;
+  
+endmodule
+
+/* Alternate Logic with variable FIFO_DEPTH
+
+    localparam FIFO_DEPTH = 2;
+
+    logic [DATA_WIDTH-1:0] fifo [FIFO_DEPTH-1:0];
+    logic [$clog2(FIFO_DEPTH):0] wr_count;
+
+    always @(posedge clk)
+    begin
+        if (!resetn)
+        begin
+            wr_count <= '0;
+            fifo[0]  <= '0;
+        end
+        else if (wr)
+        begin
+            fifo[0] <= din;
+            for (int i=1; i < FIFO_DEPTH; i++) begin
+                fifo[i] <= fifo[i-1];
+            end
+            if (wr_count != FIFO_DEPTH)
+                wr_count <= wr_count + 1;
+        end
+    end
+
+    assign empty = (wr_count == 0);
+    assign full  = (wr_count == FIFO_DEPTH);
+    assign dout  = empty ? '0 : fifo[wr_count-1];
+*/

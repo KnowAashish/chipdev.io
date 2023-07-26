@@ -15,3 +15,10 @@ module binary_to_thermometer_decoder
   assign dout=out;
   
 endmodule
+
+/*Alternate Solutions
+1. assign dout = ((1 << din+1)-1);
+2. assign dout = {256{1'b1}} >> (255-din);
+3. for (int i=0; i<256; i++)
+      dout[i] = (i < (din+'d1));
+*/

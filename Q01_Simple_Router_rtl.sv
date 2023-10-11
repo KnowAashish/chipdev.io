@@ -1,4 +1,4 @@
-module model #(parameter DATA_WIDTH=32)
+module simple_router #(parameter DATA_WIDTH=32)
   
   (input logic [DATA_WIDTH-1:0] din,
    input logic d_en,

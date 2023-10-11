@@ -1,4 +1,4 @@
-module model_tb;
+module simple_router_tb;
   parameter DATA_WIDTH=32;
   
   reg [DATA_WIDTH-1:0] DIN;
@@ -12,7 +12,7 @@ module model_tb;
   
   bit clk;
   
-  model DUT (.din(DIN), .d_en(D_EN), .addr(ADDR),
+  simple_router DUT (.din(DIN), .d_en(D_EN), .addr(ADDR),
              .dout0(DOUT0), .dout1(DOUT1), .dout2(DOUT2), .dout3(DOUT3));
   
   always begin
